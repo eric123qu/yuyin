@@ -3,6 +3,7 @@ package com.haier.ai.bluetoothspeaker1.ui;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.drawable.AnimationDrawable;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -15,6 +16,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.baidu.speech.VoiceRecognitionService;
@@ -64,6 +66,8 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     TextView mTvTimeContent;
     TextView mTvContent;
     EditText mEtTts;
+    private ImageView img_show;
+    private AnimationDrawable animNormal;
     private long startTime;
     private long endTime;
 
@@ -140,7 +144,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
 
         initShowInfo();
 //        initBaidu();
-        showContextIndex();
+        //showContextIndex();
 
        // MusicPlayerManager.getInstance().playLocalMusic("吻别");
 
@@ -297,7 +301,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     public void onDialogEvent(DialogEvent event){
         //playLocalAudio(TYPE_WAKEUP, initWakeupListener());
        // playLocalAudio(TYPE_DING, null);
-        showContextIndex();
+       // showContextIndex();
         EventBus.getDefault().post(new ReconizeStatusEvent("重新识别"));
         EventBus.getDefault().post(new ReconizeResultEvent(""));
         EventBus.getDefault().post(new NluEvent(""));
@@ -320,12 +324,10 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     }
 
     private void initShowInfo(){
-        mTvStatusContact = (TextView) findViewById(R.id.tv_status_contact);
         mTvResultContent = (TextView) findViewById(R.id.tv_result_content);
-        mTvNlu = (TextView) findViewById(R.id.tv_nlu);
-        mTvTimeContent = (TextView) findViewById(R.id.tv_time_content);
-        mTvContent = (TextView) findViewById(R.id.tv_content);
-        mEtTts = (EditText) findViewById(R.id.et_tts);
+        img_show = (ImageView) findViewById(R.id.img_show);
+        animNormal = (AnimationDrawable) img_show.getBackground();
+        animNormal.start();
     }
 
 
@@ -338,9 +340,33 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void showReconizeStatus(ReconizeStatusEvent event) {
         if (!TextUtils.isEmpty(event.message)) {
-            mTvStatusContact.setText(event.message);
+            //mTvStatusContact.setText(event.message);
+            AnimationDrawable oldAni = (AnimationDrawable)img_show.getBackground();
+            oldAni.stop();
+            if (event.message == "待唤醒"){
+                img_show.setBackgroundResource(R.drawable.ani_normal);
+                AnimationDrawable ani = (AnimationDrawable)img_show.getBackground();
+                ani.start();
+            }else if (event.message == "开始识别"){
+
+                img_show.setBackgroundResource(R.drawable.ani_listen);
+                AnimationDrawable ani = (AnimationDrawable)img_show.getBackground();
+                ani.start();
+            }else if (event.message == "TTS合成"){
+                img_show.setBackgroundResource(R.drawable.ani_tts);
+                AnimationDrawable ani = (AnimationDrawable)img_show.getBackground();
+                ani.start();
+
+//                img_show.setBackground(animTts);
+//                animTts.start();
+            }else{
+                img_show.setBackground(animNormal);
+                animNormal.start();
+            }
+
+
         } else {
-            mTvStatusContact.setText("");
+            //mTvStatusContact.setText("");
         }
     }
 
@@ -362,14 +388,14 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         }
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
+    /*@Subscribe(threadMode = ThreadMode.MAIN)
     public void showNluResult(NluEvent event) {
         if (!TextUtils.isEmpty(event.message)) {
             mTvNlu.setText(event.message);
         } else {
             mTvNlu.setText("");
         }
-    }
+    }*/
 
 
     @Override
@@ -466,7 +492,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
 
 
         speechRecognizer.startListening(intent);
-
+        EventBus.getDefault().post(new ReconizeStatusEvent("开始识别"));
     }
 
     public void stopBaiduAsr(){

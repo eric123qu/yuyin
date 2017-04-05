@@ -593,6 +593,9 @@ public class RecordModel{
 
         Log.d(TAG, "playTTS: tts player start end");
 
+        EventBus.getDefault().post(new ReconizeStatusEvent("TTS合成"));
+        EventBus.getDefault().post(new ReconizeStatusEvent("TTS合成"));
+
     }
 
     public void waitForWakeup(){
@@ -2170,7 +2173,7 @@ public class RecordModel{
         if(emptyCount > 2){
             playTTS("有事再叫我");
             waitForWakeup();
-            EventBus.getDefault().post(new ReconizeResultEvent("有事再叫我"));
+            EventBus.getDefault().post(new ReconizeResultEvent(" "));
 
 
         }else{
